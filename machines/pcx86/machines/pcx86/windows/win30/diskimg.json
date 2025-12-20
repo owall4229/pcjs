@@ -1,0 +1,8 @@
+{
+  "win30.img": {
+    "type": "hd",
+    "size": 314572800,
+    "sectors": 614400,
+    "sectorSize": 512
+  }
+}
