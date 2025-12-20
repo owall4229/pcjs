@@ -1,0 +1,27 @@
+{
+  "type": "pcx86",
+  "id": "win30",
+  "name": "Windows 3.0 (80386)",
+  "cpu": {
+    "model": "80386",
+    "speed": 20000
+  },
+  "ram": {
+    "size": 4096
+  },
+  "rom": {
+    "bios": "../roms/ibm/5170/33/BIOS.ROM",
+    "video": "../roms/ibm/vga/BIOS.ROM"
+  },
+  "video": {
+    "adapter": "vga"
+  },
+  "floppyDrives": [],
+  "hardDrives": [
+    {
+      "path": "win30.img",
+      "type": "hd"
+    }
+  ],
+  "autoStart": true
+}
