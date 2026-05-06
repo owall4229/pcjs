@@ -1,7 +1,7 @@
 /**
  * @fileoverview Gulp file for pcjs.org
  * @author Jeff Parsons <Jeff@pcjs.org>
- * @copyright © 2012-2025 Jeff Parsons
+ * @copyright © 2012-2026 Jeff Parsons
  * @license MIT <https://www.pcjs.org/LICENSE.txt>
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
@@ -57,21 +57,59 @@
 
 import fs from "fs";
 import path from "path";
+import { Transform, Readable } from "stream";
 import gulp from "gulp";
 import gulpNewer from "gulp-newer";
 import gulpConcat from "gulp-concat";
 import gulpMergeJSON from "gulp-merge-json";
-import gulpForEach from "gulp-foreach";
 import gulpHeader from "gulp-header";
 import gulpReplace from "gulp-replace";
-import closureCompiler from "google-closure-compiler";
+import {gulp as closureCompiler} from "google-closure-compiler";
 import gulpSourceMaps from "gulp-sourcemaps";
 import pcjslib from "./tools/modules/pcjslib.js";
 
 let argv = pcjslib.getArgs()[1];
-let gulpClosureCompiler = closureCompiler.gulp();
+let gulpClosureCompiler = closureCompiler;
 let pkg = JSON.parse(fs.readFileSync("./package.json", "utf8"));
 let eol = process.platform === "win32"? "\r\n" : "\n";
+
+/**
+ * gulpForEach() is a helper function that allows us to create a Transform stream that can be used in
+ * a Gulp pipeline, and that will invoke the specified function for each file in the stream.  The function
+ * is passed a Readable stream containing the file, and the file itself, and can return a new stream
+ * containing the transformed file.
+ *
+ * It allows us to eliminate the use of the abandoned ""gulp-foreach" plugin.
+ *
+ * @param {*} fn
+ * @returns
+ */
+function gulpForEach(fn) {
+    return new Transform({
+        objectMode: true,
+        transform(file, enc, done) {
+            let notYetRead = true;
+            const readStream = new Readable({ objectMode: true });
+            readStream._read = function() {
+                if (notYetRead) {
+                    notYetRead = false;
+                    readStream.push(file);
+                } else {
+                    readStream.push(null);
+                }
+            };
+            const resultStream = fn(readStream, file);
+            if (resultStream) {
+                resultStream.on('end', done);
+                resultStream.on('data', (result) => this.push(result));
+                resultStream.on('error', done);
+            } else {
+                done();
+            }
+        },
+        flush(done) { done(); }
+    });
+}
 
 /**
  * Every machine must necessarily have a unique machine type ID (eg, "ti57").
@@ -270,9 +308,9 @@ aMachines.forEach(function(machineID)
     let taskCompile = "compile/" + machineID;
     aCompileTasks.push(taskCompile);
     gulp.task(taskCompile, function() {
-        let stream = gulp.src(srcFile /*, {base: './'} */);
         if (aMachinesOutdated.indexOf(machineID) >= 0) {
-            stream.pipe(gulpSourceMaps.init())
+            return gulp.src(srcFile /*, {base: './'} */)
+                  .pipe(gulpSourceMaps.init())
                   .pipe(gulpClosureCompiler({
                     assume_function_wrapper: true,
                     compilation_level: 'ADVANCED',
@@ -295,7 +333,7 @@ aMachines.forEach(function(machineID)
                   .pipe(gulpSourceMaps.write('./', {includeContent: false}))
                   .pipe(gulp.dest(machineReleaseDir));
         }
-        return stream;
+        return Promise.resolve();
     });
 });
 

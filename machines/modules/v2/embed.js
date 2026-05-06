@@ -1,7 +1,7 @@
 /**
  * @fileoverview PCjs embedding functionality
  * @author Jeff Parsons <Jeff@pcjs.org>
- * @copyright © 2012-2025 Jeff Parsons
+ * @copyright © 2012-2026 Jeff Parsons
  * @license MIT <https://www.pcjs.org/LICENSE.txt>
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
@@ -510,9 +510,14 @@ function embedMachine(sAppName, sAppClass, idMachine, sXMLFile, sXSLFile, sParms
                         }
                     }
                     else if (document.implementation && document.implementation.createDocument) {
-                        let xsltProcessor = new XSLTProcessor();
-                        xsltProcessor['importStylesheet'](xsl);
-                        let eFragment = xsltProcessor['transformToFragment'](xml, document);
+                        let eFragment, message;
+                        try {
+                            let xsltProcessor = new XSLTProcessor();
+                            xsltProcessor['importStylesheet'](xsl);
+                            eFragment = xsltProcessor['transformToFragment'](xml, document);
+                        } catch(err) {
+                            message = err.message;
+                        }
                         if (eFragment) {
                             /*
                              * This fails in Microsoft Edge...
@@ -573,7 +578,7 @@ function embedMachine(sAppName, sAppClass, idMachine, sXMLFile, sXSLFile, sParms
                                 displayError(sURL, "invalid machine element: " + idMachine);
                             }
                         } else {
-                            displayError(sURL, "transformToFragment failed");
+                            displayError(sURL, "this browser has removed XSLT support (" + message + ")");
                         }
                     } else {
                         /*

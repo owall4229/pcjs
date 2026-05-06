@@ -2,7 +2,7 @@
   "name": "pcjs",
   "type": "module",
   "version": "2.00.0",
-  "year": 2025,
+  "year": 2026,
   "description": "PCjs",
   "license": "MIT",
   "engines": {
@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "node tools/misc/patch-vinyl-fs.cjs"
   },
   "repository": {
     "type": "git",
@@ -33,26 +34,31 @@
   "dependencies": {
     "eslint": "^8.57.1",
     "glob": "^7.2.3",
-    "google-closure-compiler": "^20240317.0.0",
-    "gulp": "^4.0.2",
+    "google-closure-compiler": "^20260128.0.0",
+    "gulp": "^5.0.1",
     "gulp-chmod": "^3.1.0",
+    "gulp-cli": "^3.1.0",
     "gulp-concat": "^2.6.1",
-    "gulp-foreach": "^0.1.0",
-    "gulp-header": "^2.0.9",
+    "gulp-header": "^2.0.12",
     "gulp-merge-json": "^2.2.1",
     "gulp-newer": "^1.4.0",
     "gulp-replace": "^1.1.4",
     "gulp-sourcemaps": "^3.0.0",
     "json5": "^2.2.3",
     "mkdirp": "^2.1.6",
-    "mysql2": "^3.15.2",
+    "mysql2": "^3.19.1",
     "pako": "^2.1.0",
     "path": "^0.12.7",
-    "pdf-parse": "^1.1.1",
-    "replace": "^1.2.2",
-    "sequelize": "^6.37.7",
+    "pdf-parse": "^1.1.4",
+    "sequelize": "^6.37.8",
     "serialport": "^11.0.1",
     "xml2js": "^0.5.0",
+    "xslt-polyfill": "^1.0.19",
     "yargs-parser": "^21.1.1"
+  },
+  "overrides": {
+    "@gulp-sourcemaps/identity-map": {
+      "postcss": "^8.4.31"
+    }
   }
 }
